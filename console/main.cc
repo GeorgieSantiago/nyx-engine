@@ -1,9 +1,18 @@
-#include "engine/example/example.h"
-#include "Engine/vulkan_init.h"
-#include <iostream>
+#include "engine/nyx.h"
+#include "engine/example/vulkan_init.h"
 
 int main() {
-    print("Hello Nyx Engine");
-    run();
+    Nyx* engine = &Nyx();
+    if (engine->startup() == 0) {
+        engine->logger->log_message("Failed to startup");
+        //Throw error
+    }
+
+    engine->run();
+
+    if (engine->shutdown() == 0) {
+        engine->logger->log_message("Failed to shutdown smoothly");
+    }
+
     return 0;
 }

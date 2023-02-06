@@ -1,16 +1,17 @@
 # env_setup/BUILD
 load("@rules_cc//cc:defs.bzl", "cc_binary")
-
+test_glob = glob(["engine/**/*.test.*"])
 # engine
 cc_library(
     name = "nyx_engine",
-    srcs = ["engine/example/example.cpp", "engine/vulkan_init.cpp"],
-    hdrs = ["engine/example/example.h", "engine/vulkan_init.h"],
+    srcs = glob(["engine/**/*.cpp"], test_glob),
+    hdrs = glob(["engine/**/*.h"], test_glob),
     copts = ["/DCOMPILING_NYX_ENGINE_DLL"],
     deps = [
         "//third-party/glfw",
         "//third-party/glm",
-        "@rules_vulkan//vulkan:vulkan_cc_library"
+        "@rules_vulkan//vulkan:vulkan_cc_library",
+        "@com_github_google_glog//:glog",
     ],
 )
 
@@ -21,7 +22,7 @@ cc_test(
     deps = ["@com_google_googletest//:gtest_main"],
 )
 
-# Console
+# console
 cc_binary(
     name = "nyx_console",
     srcs = ["console/main.cc"],
