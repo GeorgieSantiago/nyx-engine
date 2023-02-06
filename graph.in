@@ -1,0 +1,6 @@
+digraph mygraph {
+  node [shape=box];
+  "//:nyx_engine"
+  "//:nyx_engine" -> "//:Engine/example/example.cpp\n//:Engine/example/example.h"
+  "//:Engine/example/example.cpp\n//:Engine/example/example.h"
+}
