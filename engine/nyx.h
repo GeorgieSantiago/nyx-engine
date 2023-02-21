@@ -3,6 +3,7 @@
 #include "common/module.h"
 #include "common/logger.h"
 #include "common/input.h"
+#include "math/vec3.h"
 
 class Nyx
 {

@@ -1,5 +1,16 @@
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+#####################################################
+# Constants #########################################
+#####################################################
+
+GLFW_VERSION = "3.3.5"
+GLM_VERSION = "0.9.9.8"
+
+#####################################################
+# Google ############################################
+#####################################################
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Google Test
 http_archive(
@@ -8,7 +19,7 @@ http_archive(
   strip_prefix = "googletest-5ab508a01f9eb089207ee87fd547d290da39d015",
 )
 
-# ===== GLog =====
+# GLOG
 http_archive(
     name = "com_github_gflags_gflags",
     sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
@@ -23,7 +34,9 @@ http_archive(
     urls = ["https://github.com/google/glog/archive/v0.6.0.zip"],
 )
 
-# ===== vulkan =====
+#####################################################
+# Vulkan ############################################
+#####################################################
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
@@ -37,9 +50,10 @@ load("@rules_vulkan//vulkan:repositories.bzl", "vulkan_repositories")
 
 vulkan_repositories()
 
-# ===== glfw =====
+#####################################################
+# Third-Party #######################################
+#####################################################
 
-GLFW_VERSION = "3.3.5"
 
 http_archive(
     name = "glfw",
@@ -49,9 +63,6 @@ http_archive(
     urls = ["https://github.com/glfw/glfw/archive/{}.zip".format(GLFW_VERSION)],
 )
 
-# ===== glm =====
-
-GLM_VERSION = "0.9.9.8"
 
 http_archive(
     name = "glm",
@@ -59,4 +70,10 @@ http_archive(
     sha256 = "4605259c22feadf35388c027f07b345ad3aa3b12631a5a316347f7566c6f1839",
     strip_prefix = "glm-{}".format(GLM_VERSION),
     urls = ["https://github.com/g-truc/glm/archive/{}.zip".format(GLM_VERSION)],
+)
+
+git_repository(
+    name = "mathfu",
+    commit = "da23a1227bb65fbb7f2f5b6c504fbbdd1dfdab4b",
+    remote = "https://github.com/google/mathfu.git",
 )

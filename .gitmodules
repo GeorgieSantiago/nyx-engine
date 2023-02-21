@@ -1,0 +1,3 @@
+[submodule "third-party/mathfu"]
+	path = third-party/mathfu
+	url = https://github.com/google/mathfu.git

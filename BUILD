@@ -1,6 +1,20 @@
 # env_setup/BUILD
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 test_glob = glob(["engine/**/*.test.*"])
+
+cc_library(
+    name = "mathfu", 
+    includes = ["third-party/mathfu/include/"],
+    deps = ["mathfu-internal"],
+    visibility = ["//visibility:public"],
+)
+
+cc_import(
+    name = "mathfu-internal",
+    hdrs = glob(["third-party/mathfu/**/*.h"]),
+    visibility = ["//visibility:private"],
+)
+
 # engine
 cc_library(
     name = "nyx_engine",
@@ -8,6 +22,7 @@ cc_library(
     hdrs = glob(["engine/**/*.h"], test_glob),
     copts = ["/DCOMPILING_NYX_ENGINE_DLL"],
     deps = [
+        ":mathfu",
         "//third-party/glfw",
         "//third-party/glm",
         "@rules_vulkan//vulkan:vulkan_cc_library",
