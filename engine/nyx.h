@@ -4,6 +4,7 @@
 #include "common/logger.h"
 #include "common/input.h"
 #include "math/vec3.h"
+#include "string/nstring.h"
 
 class Nyx
 {

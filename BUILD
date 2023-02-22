@@ -27,6 +27,7 @@ cc_library(
         "//third-party/glm",
         "@rules_vulkan//vulkan:vulkan_cc_library",
         "@com_github_google_glog//:glog",
+        "@com_google_absl//absl/strings",
     ],
 )
 

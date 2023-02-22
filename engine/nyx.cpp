@@ -10,6 +10,7 @@ int Nyx::startup()
     input->startup();
     logger->log_message("Listening to input");
     Vec3 example_vector = Vec3();
+    print_joined();
     return 1;
 }
 
