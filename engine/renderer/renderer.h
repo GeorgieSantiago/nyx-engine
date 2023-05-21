@@ -25,6 +25,7 @@ private:
     VkInstance* vulkan_ptr;
     void startup_glfw();
     void startup_vulkan();
+    void create_instance_or_fail(VkResult result);
 public:
     int startup() override;
     int shutdown() override;
