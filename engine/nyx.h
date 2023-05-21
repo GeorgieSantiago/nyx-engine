@@ -3,6 +3,7 @@
 #include "common/module.h"
 #include "common/logger.h"
 #include "common/input.h"
+#include "renderer/renderer.h"
 #include "math/vec3.h"
 #include "string/nstring.h"
 
@@ -13,6 +14,7 @@ private:
 public:
     MLogger* logger;
     MInput* input;
+    Renderer* renderer;
     int startup();
     int shutdown();
     int is_running();

@@ -9,6 +9,9 @@ int Nyx::startup()
     input = &MInput();
     input->startup();
     logger->log_message("Listening to input");
+    renderer = &Renderer();
+    renderer->startup();
+    logger->log_message("Vulkan initialized");
     Vec3 example_vector = Vec3();
     print_joined();
     return 1;
@@ -21,6 +24,9 @@ int Nyx::shutdown()
 
     input->shutdown();
     input = nullptr;
+
+    renderer->shutdown();
+    renderer = nullptr;
     
     return 1;
 }
@@ -30,7 +36,7 @@ void Nyx::run()
     logger->log_message("Running Nyx Engine");
     while(is_running() == 1)
     {
-
+        renderer->update();
     }
 }
 
