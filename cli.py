@@ -2,26 +2,25 @@ import os
 from argparse import ArgumentParser
 import pathlib
 import subprocess
+from sys import platform
 
-SHADER_DIR: str = "shaders/"
-SHADER_BUILD_DIR: str = "shaders/build/"
-VULKAN_GLSLC: str = pathlib.Path("C:/VulkanSDK/1.3.236.0/Bin/glslc.exe")
+SHADER_DIR: str = "./shaders/"
+SHADER_BUILD_DIR: str = "./shaders/build/"
+VULKAN_GLSLC: str = pathlib.Path("C:/VulkanSDK/1.3.236.0/Bin/glslc.exe") if platform == 'win32' else pathlib.Path("/Users/georgiesantiago/VulkanSDK/1.3.243.0/macOS/bin/glslc")
 
 def main(args):
     if args.command == 'build':
         compile_shaders()
-        subprocess.call("bazel build //:all")
+        run("bazel build //:all --sandbox_debug --test_env=VULKAN_SDK=/Users/georgiesantiago/VulkanSDK/1.3.243.0")
     if args.command == 'build:shaders':
         compile_shaders()
     if args.command == 'build:dependency_graph':
-        subprocess.call('bazel query "deps(//:all)" --noimplicit_deps --output graph >> graph.in && dot -Tpng < graph.in > graph.png')
+        run('bazel query "deps(//:all)" --noimplicit_deps --output graph >> graph.in && dot -Tpng < graph.in > graph.png')
     if args.command == 'test':
-        subprocess.call('bazel test --test_output=all //:all')
+        run('bazel test --test_output=all //:all')
     if args.command == 'run:console':
-        subprocess.call(pathlib.Path('bazel-bin/nyx_console.exe'))
-'''
-@description walks the shader directory and auto compiles shaders
-'''
+        run(pathlib.Path('bazel-bin/nyx_console.exe'))
+
 def compile_shaders():
     for file in os.listdir(SHADER_DIR):
         if ".vert" in file or ".frag" in file:
@@ -32,7 +31,10 @@ def compile_shaders():
                 shader_path,
                 shader_out_path
             )
-            subprocess.call(cmd)
+            run(cmd)
+
+def run(cmd: str):
+    subprocess.run(cmd, shell=True if platform != 'win32' else False)
 
 if __name__ == '__main__':
     args = ArgumentParser(
