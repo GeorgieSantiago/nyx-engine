@@ -15,8 +15,9 @@
 
 struct QueueFamilyIndices {
     uint32_t *graphics_family = nullptr;
+    uint32_t *present_family = nullptr;
     bool is_complete() {
-        return graphics_family != nullptr;
+        return graphics_family != nullptr && present_family != nullptr;
     }
 };
 
@@ -34,9 +35,11 @@ private:
     VkPhysicalDevice physical_device;
     VkDevice logical_device;
     VkQueue graphics_queue;
+    VkQueue present_queue;
     VkSurfaceKHR surface;
     void startup_glfw();
     void startup_vulkan();
+    void startup_surface();
     void startup_physical_devices();
     void startup_logical_devices();
     void create_instance_or_fail(VkResult result);

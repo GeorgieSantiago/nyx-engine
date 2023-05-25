@@ -5,6 +5,7 @@ int Renderer::startup()
     log_ptr = MLogger::get();
     startup_glfw();
     startup_vulkan();
+    startup_surface();
     startup_physical_devices();
     startup_logical_devices();
     return 0;
@@ -14,6 +15,7 @@ int Renderer::shutdown()
 {
     glfwDestroyWindow(window);
     window = nullptr;
+    vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
     vkDestroyDevice(logical_device, nullptr);
     glfwTerminate();
@@ -51,15 +53,22 @@ void Renderer::startup_vulkan()
     createInfo.pApplicationInfo = &appInfo;
 
     uint32_t glfwExtensionCount = 0;
-        const char** glfwExtensions;
-        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+    const char** glfwExtensions;
+    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-        createInfo.enabledExtensionCount = glfwExtensionCount;
-        createInfo.ppEnabledExtensionNames = glfwExtensions;
+    createInfo.enabledExtensionCount = glfwExtensionCount;
+    createInfo.ppEnabledExtensionNames = glfwExtensions;
+    createInfo.enabledLayerCount = 0;
+    create_instance_or_fail(vkCreateInstance(&createInfo, nullptr, &instance));
+}
 
-        createInfo.enabledLayerCount = 0;
-
-        create_instance_or_fail(vkCreateInstance(&createInfo, nullptr, &instance));
+void Renderer::startup_surface()
+{
+    if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+        auto err = std::runtime_error("failed to create window surface!");
+        log_ptr->log_error(err);
+        throw err;
+    }
 }
 
 void Renderer::startup_physical_devices()
@@ -90,20 +99,30 @@ void Renderer::startup_physical_devices()
 void Renderer::startup_logical_devices()
 {
     QueueFamilyIndices indices = find_queue_families(physical_device);
+    std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
+    std::vector<uint32_t> unique_queue_families = {*indices.graphics_family, *indices.present_family};
 
+    float queue_priority = 1.0f;
+    for (uint32_t queueFamily : unique_queue_families) {
+        VkDeviceQueueCreateInfo queue_create_info{};
+        queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queue_create_info.queueFamilyIndex = queueFamily;
+        queue_create_info.queueCount = 1;
+        queue_create_info.pQueuePriorities = &queue_priority;
+        queue_create_infos.push_back(queue_create_info);
+    }
     VkDeviceQueueCreateInfo queue_create_info{};
     queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queue_create_info.queueFamilyIndex = *indices.graphics_family;
     queue_create_info.queueCount = 1;
-    float queuePriority = 1.0f;
-    queue_create_info.pQueuePriorities = &queuePriority;
+    queue_create_info.pQueuePriorities = &queue_priority;
     VkPhysicalDeviceFeatures device_features{};
     VkDeviceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    create_info.pQueueCreateInfos = &queue_create_info;
-    create_info.queueCreateInfoCount = 1;
+    create_info.pQueueCreateInfos = queue_create_infos.data();
     create_info.pEnabledFeatures = &device_features;
     create_info.enabledExtensionCount = 0;
+    create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
     std::vector<char*> validation_layers;
     // @TODO validation layers
     if (false) {
@@ -118,6 +137,7 @@ void Renderer::startup_logical_devices()
         log_ptr->log_error(err);
         throw err;
     }
+    vkGetDeviceQueue(logical_device, *indices.present_family, 0, &present_queue);
     vkGetDeviceQueue(logical_device, *indices.graphics_family, 0, &graphics_queue);
 }
 
@@ -136,13 +156,16 @@ QueueFamilyIndices Renderer::find_queue_families(VkPhysicalDevice device)
 
         std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
         vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, queue_families.data());
-
         uint32_t i = 0;
         for (const auto& queue_family : queue_families) {
             if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 indices.graphics_family = &i;
             }
-
+            VkBool32 present_support = false;
+            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &present_support);
+            if (present_support) {
+                indices.present_family = &i;
+            }
             if (indices.is_complete()) {
                 break;
             }
